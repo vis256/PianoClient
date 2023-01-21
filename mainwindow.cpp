@@ -1,6 +1,12 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
+#include "cxxmidi/cxxmidi/file.hpp"
+#include "cxxmidi/cxxmidi/output/default.hpp"
+#include "cxxmidi/cxxmidi/player/player_async.hpp"
+#include "cxxmidi/cxxmidi/player/player_sync.hpp"
+#include "cxxmidi/cxxmidi/note.hpp"
+
 #include <QWidget>
 #include <QDateTime>
 
@@ -10,9 +16,41 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     connect(ui->connectButton, &QPushButton::clicked, this, &MainWindow::connectButtonHit);
-    updateRoomList();
-    updateRoomList();
-    updateRoomList();
+    connect(ui->refreshButton, &QPushButton::clicked, this, &MainWindow::updateRoomList);
+    connect(ui->addNewRoomButton, &QPushButton::clicked, this, &MainWindow::createRoomAndJoin);
+
+    dt = cxxmidi::converters::Us2dt(
+        500000,
+        500000,
+        500
+    );
+
+    for (int chuj = 0; chuj < 10; ++chuj) {
+        track.push_back(
+            cxxmidi::Event(0, cxxmidi::Message::kNoteOn, cxxmidi::Note::MiddleC(), 100)
+        );
+                track.push_back(
+                    cxxmidi::Event(dt, cxxmidi::Message::kNoteOn, cxxmidi::Note::MiddleC() + 1, 100)
+                );
+                track.push_back(
+                    cxxmidi::Event(dt, cxxmidi::Message::kNoteOn, cxxmidi::Note::MiddleC() + 2, 100)
+                );
+                track.push_back(
+                    cxxmidi::Event(dt, cxxmidi::Message::kNoteOn, cxxmidi::Note::MiddleC() + 3, 100)
+                );
+    }
+
+
+    track.push_back(
+                cxxmidi::Event(0, cxxmidi::Message::kMeta, cxxmidi::Message::kEndOfTrack));
+
+    cxxmidi::output::Default output;
+
+    cxxmidi::player::PlayerAsync player(&output);
+
+    player.SetFile(&f);
+
+    player.Play();
 }
 
 MainWindow::~MainWindow()
@@ -54,7 +92,7 @@ void MainWindow::connectButtonHit() {
 }
 
 void MainWindow::updateRoomList() {
-    QPushButton *button = new QPushButton(ui->scrollAreaWidgetContents);
+    send("list | ");
 }
 
 
@@ -90,7 +128,7 @@ void MainWindow::socketError(QTcpSocket::SocketError err){
 
 void MainWindow::socketReadable(){
     QByteArray ba = sock->readAll();
-    QString command = QString::fromUtf8(ba).trimmed();
+    QString command = QString::fromUtf8(ba);
     printToDebug(command, "RCVD");
     handleCommand(command);
 }
@@ -104,7 +142,34 @@ void MainWindow::printToDebug(QString command, QString type) {
 }
 
 void MainWindow::handleCommand(QString command) {
-    auto c = command.split((" "))[0];
+    auto splitCommand = command.split("|");
+    bool handledAction = false;
 
-    sock->write("create");
+    QString action = "";
+    std::vector<QString> params = {};
+
+    for (auto x : splitCommand) {
+        if (!handledAction) {
+            action = x;
+            handledAction = true;
+        } else {
+            params.push_back(x);
+        }
+    }
+
+    if (action == "JOIN") {
+        ui->roomIdLabel->setText("XD");
+        ui->addNewRoomButton->setEnabled(false);
+    }
+
+}
+
+void MainWindow::send(char * data) {
+    sock->write(data);
+    printToDebug(data, "SENT");
+}
+
+void MainWindow::createRoomAndJoin() {
+    send("create | ");
+    toJoin = true;
 }

@@ -46,7 +46,7 @@
         <number>20000</number>
        </property>
        <property name="value">
-        <number>4200</number>
+        <number>12345</number>
        </property>
       </widget>
      </item>
@@ -133,20 +133,33 @@
            <height>269</height>
           </rect>
          </property>
-         <widget class="QPushButton" name="pushButton">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>381</width>
-            <height>24</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>PushButton</string>
-          </property>
-         </widget>
         </widget>
+       </widget>
+       <widget class="QPushButton" name="refreshButton">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>0</y>
+          <width>101</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Odśwież</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="addNewRoomButton">
+        <property name="geometry">
+         <rect>
+          <x>150</x>
+          <y>0</y>
+          <width>131</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Dodaj nowy pokój</string>
+        </property>
        </widget>
       </widget>
      </item>
@@ -992,6 +1005,19 @@
        </widget>
       </item>
      </layout>
+    </widget>
+    <widget class="QLabel" name="roomIdLabel">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>2</y>
+       <width>52</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
     </widget>
    </widget>
   </widget>

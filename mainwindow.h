@@ -5,6 +5,9 @@
 #include <QTcpSocket>
 #include <QTimer>
 
+#include "cxxmidi/cxxmidi/file.hpp"
+
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -28,6 +31,7 @@ public:
 
 
     void printToDebug(QString command, QString type);
+    void send(char * data);
 
     void handleKeyPress(int key);
     void connectButtonHit();
@@ -35,6 +39,16 @@ public:
     void handleCommand(QString command);
 
     void updateRoomList();
+
+    void createRoomAndJoin();
+
+    int currentRoomId = -1;
+    bool toJoin = false;
+
+    uint32_t dt;
+    cxxmidi::File f;
+    cxxmidi::Track &track = f.AddTrack();
+
 
 private:
     Ui::MainWindow *ui;

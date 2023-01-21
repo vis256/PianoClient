@@ -12,12 +12,40 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
 
+find_package(ALSA REQUIRED)
+find_package(Threads REQUIRED)
+
 set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
 )
+
+add_library(
+    CxxMidi INTERFACE
+)
+
+add_library(
+    CxxMidi::CxxMidi ALIAS CxxMidi
+)
+
+
+include_directories(
+    ${ALSA_INCLUDE_DIRS}
+)
+
+link_libraries(
+  ${ALSA_LIBRARIES}
+  ${CMAKE_THREAD_LIBS_INIT}
+)
+
+link_libraries(
+  CxxMidi::CxxMidi
+  Threads::Threads
+  ${ALSA_LIBRARIES}
+)
+
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(SK-Client
@@ -42,7 +70,8 @@ else()
     endif()
 endif()
 
-target_link_libraries(SK-Client PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
+
+target_link_libraries(SK-Client PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network ${LIBMIDI})
 
 set_target_properties(SK-Client PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
@@ -51,6 +80,9 @@ set_target_properties(SK-Client PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
+
+target_compile_options(SK-Client PRIVATE -Wall -pedantic -Wextra)
+target_compile_features(SK-Client PRIVATE cxx_std_17)
 
 install(TARGETS SK-Client
     BUNDLE DESTINATION .
